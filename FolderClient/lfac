@@ -1,0 +1,69 @@
+
+//ex1
+%{
+#include <stdio.h>
+%}
+cifra [0-9]
+nr {cifra}+
+%%
+\<{nr}\> {ECHO;} // recunoaste orice numar care se afla intre < >
+ab+  {printf ("[%s]\n", yytext);} //ab+ este a concatenat cu b+ (expresie regulata) 
+.|\n ;  //sterge orice altceva inafara de de cuvintele ce indeplinesc regulile de mai sus   // . recunoaste orice simbol ascii care... sa trateze . si \n cu aceeasi indiferenta ca regulile de mai sus
+%%       
+int main(int argc, char** argv){
+FILE *g;
+if(argc>0)
+ yyin = fopen(argv[1],"r");
+
+if(!(g = fopen("out.txt","w")))
+    fprintf(stderr,"eroare creare fisier!");
+else
+ yyout=g; 
+
+yylex();
+
+}
+
+
+//ex2
+
+%{
+#include <stdio.h>
+int i=0;
+%}
+%%
+infoiasi {i++; REJECT;}  //daca gasaest secv infoiasi, inc i si dau REJECT = inteleg ca ai gasit secv, dar vreau si ca cele de jos sa vada
+			 // daca scoatem REJECT dupa ce face i++, elimina secv, iar expresia de jos nu o sa mai aiba
+inf {printf("INF");}
+%%
+int main(int argc, char** argv ){
+if(argc>0)
+ yyin = fopen(argv[1],"r");
+yylex();
+printf("\n numarul de aparitii ale sirului infoiasi: %d\n",i);
+    
+}
+
+
+//ex3
+
+//avem nevoie de namespace pentru ca cateodata vrem sa analizam altfel
+//  de ex x=0xa7,    este corect in c daca analiatorul analizeaza un hexazecimal de ex
+%{
+#include <stdio.h>
+%}
+%x pas
+%%
+password: {ECHO; BEGIN pas;}
+<pas>[^ \n] {printf("*");} // alege unul care nu e spatiu sau rand nou, adica pun *
+<pas>[ \n] {ECHO; BEGIN 0;}  
+[0-9]+ {printf("[%s]", yytext);}
+%%
+int main(int argc, char** argv){
+if(argc>0)
+ yyin = fopen(argv[1],"r");
+yylex();
+}
+
+
+https://ds9a.nl/lex-yacc/cvs/lex-yacc-howto.html
